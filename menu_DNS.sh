@@ -9,7 +9,7 @@ Choice=$(dialog --colors --nocancel --nook --menu "\
         \Zr Developed by the xDrip team \Zn\
   \n\n
 Use the arrow keys to move the cursor.\n\
-Press Enter to execute the highlighted option.\n" 13 60 3\
+Press Enter to execute the highlighted option.\n" 13 50 3\
  "1" "Use FreeDNS"\
  "2" "Directly enter own hostname and IP address"\
  "3" "Return"\

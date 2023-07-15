@@ -16,7 +16,7 @@ do
     clear
     exec 3>&1
     Values=$(dialog --colors --ok-label "Submit" --form "       \Zr Developed by the xDrip team \Zn\n\n\n\
-Enter your hostname (e.g., nightscout.example.com - needs to be a subdomain!) and IP address (e.g., 34.111.222.12)." 12 50 0 "User ID:" 1 1 "$hostname" 1 14 25 0 "Password:" 2 1 "$ipaddress" 2 14 25 0 2>&1 1>&3)
+Enter your hostname and IP address." 12 60 0 "Hostname:" 1 1 "$hostname" 1 14 35 0 "IP address:" 2 1 "$ipaddress" 2 14 35 0 2>&1 1>&3)
     response=$?
     if [ $response = 255 ] || [ $response = 1 ] # canceled or escaped
     then
