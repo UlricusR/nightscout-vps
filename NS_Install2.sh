@@ -173,7 +173,7 @@ sudo systemctl enable rc-local
 
 sudo systemctl start rc-local.service
  
-sudo /xDrip/scripts/ConfigureFreedns.sh
+/xDrip/scripts/menu_DNS.sh
 if [ ! -s /tmp/FreeDNS_Failed ]
 then
 clear
