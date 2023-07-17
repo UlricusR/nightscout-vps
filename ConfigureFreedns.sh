@@ -142,12 +142,12 @@ read -a split <<< $FLine
 hostname=${split[0],,}
 directurl=${split[2]}
 
+export HOSTNAME=$hostname
+export DIRECTURL=$directurl
+
 #create a file to store the data for the startup script.
 cat> /etc/dns-config.sh<<EOF
 #!/bin/sh
 export HOSTNAME=$hostname
 export DIRECTURL=$directurl
 EOF
-
-# run the script right away to publish the variables
-. /etc/dns-config.sh
