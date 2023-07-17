@@ -143,84 +143,11 @@ hostname=${split[0],,}
 directurl=${split[2]}
 
 #create a file to store the data for the startup script.
-cat> /etc/free-dns.sh<<EOF
+cat> /etc/dns-config.sh<<EOF
 #!/bin/sh
 export HOSTNAME=$hostname
 export DIRECTURL=$directurl
 EOF
 
-# Start the first update immediately
-wget -O - --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 $directurl
-
-#Add the command to renew the script to the startup url
-if ! grep -q "DIRECTURL" /etc/rc.local; then
-    echo . /etc/free-dns.sh >>  /etc/rc.local
-    echo wget -O /tmp/freedns.txt --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 \$DIRECTURL >>  /etc/rc.local
-    echo exit 0 \# This should be the last line to ensure the startup will complete. >> /etc/rc.local
-fi
-
-dialog --colors --msgbox "       \Zr Developed by the xDrip team \Zn\n\n\
-Press enter to proceed.  Please be patient as it may take up to 10 minutes to complete." 8 50
-clear
-# wait for the ip to be updated. This might take up to 10 minutes.
-cnt=0
-while : ; do
-    sleep 30
-    registered=$(nslookup $hostname|tail -n2|grep A|sed s/[^0-9.]//g)
-    current=$(wget -q -O - http://checkip.dyndns.org|sed s/[^0-9.]//g)
-    echo $current $registered
-    [[ "$registered" != "$current" ]] || break
-    cnt=$((cnt+1))
-    echo $cnt
-    if (( cnt%6 == 0 )); then
-         echo "ccc" $cnt
-        wget -O - --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 $directurl
-    fi
-    sudo systemd-resolve --flush-caches
-    ping -c 1 $hostname
-    sudo systemd-resolve -4 $hostname
-    if [ $cnt -gt 20 ]
-    then
-      clear
-      dialog --colors --msgbox "       \Zr Developed by the xDrip team \Zn\n\n\
-Please close this window.  Open a new SSH terminal.  Run FreeDNS Setup again to complete FreeDNS setup." 9 50
-      exit
-    fi
-done
-
-#Fix the certificate using the new host name.
-
-
-for i in {1..4}
-do
-    for j in {1..1000}
-    do
-    read -t 0.001 dummy
-    done
-
-    sudo certbot --nginx -d "$hostname" --redirect --agree-tos --no-eff-email
-
-    if [ ! -s /etc/letsencrypt/live/"$hostname"/cert.pem ] || [ ! -s /etc/letsencrypt/live/"$hostname"/privkey.pem ]
-    then
-
-         echo freedns failed sleeping 
-         sleep 60
-    else
-        # worked, geting out of the loop.
-        exit 1
-    fi
-done
-cat > /tmp/FreeDNS_Failed << EOF
-Internal error.  Must run FreeDNS again.
-EOF
-
-dialog --colors --msgbox "       \Zr Developed by the xDrip team \Zn\n\nInternal error.  Press enter to exit.  Then, run \"Install Nightscout phase 2\" again." 8 50
-
-else  # If FreeDNS is down
-dialog --colors --msgbox "       \Zr Developed by the xDrip team \Zn\n\n\
-It seems the FreeDNS site is down.  Please try again when FreeDNS is back up." 9 50
-cat > /tmp/FreeDNS_Failed << EOF
-The FreeDNS site is down.
-EOF
-fi
- 
+# run the script right away to publish the variables
+. /etc/dns-config.sh

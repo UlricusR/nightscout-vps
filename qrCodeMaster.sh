@@ -5,7 +5,7 @@ echo "Show the base URL required to become master" - Navid200
 echo
 
 HOSTNAME=""
-. /etc/free-dns.sh
+. /etc/dns-config.sh
 
 . /etc/nsconfig
 apisec=$API_SECRET

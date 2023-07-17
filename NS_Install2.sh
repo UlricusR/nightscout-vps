@@ -173,8 +173,12 @@ sudo systemctl enable rc-local
 
 sudo systemctl start rc-local.service
  
+# Get DNS parameters (hostname, IP address)
 /xDrip/scripts/menu_DNS.sh
-if [ ! -s /tmp/FreeDNS_Failed ]
+
+# Configure DNS
+/xDrip/scripts/ConfigureDNS.sh
+if [ ! -s /tmp/DNS-config_Failed ]
 then
 clear
 

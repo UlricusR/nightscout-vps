@@ -29,8 +29,8 @@ export APP_JSON_FILE=$SCRIPT_DIR/app.json
 sudo apt-get -y install python3-pip >> /tmp/variables_log 2>&1
 pip install Django django-extensions Werkzeug qrcode >> /tmp/variables_log 2>&1
 
-if test -f "/etc/free-dns.sh"; then
-. /etc/free-dns.sh
+if test -f "/etc/dns-config.sh"; then
+. /etc/dns-config.sh
 else
 export HOSTNAME=$(ls /etc/letsencrypt/live | grep -v README)
 fi

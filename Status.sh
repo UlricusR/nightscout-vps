@@ -86,7 +86,7 @@ branch="\Zb\Z1$(< /srv/brnch)\Zn" # Set the color to red if the branch name is n
 fi
 
 HOSTNAME=""
-. /etc/free-dns.sh
+. /etc/dns-config.sh
 if [ "$HOSTNAME" = "" ]
 then
 FD="No hostname"
@@ -154,7 +154,7 @@ $Missing $Phase1 $rclocal_1 \n\n\
 Swap: $swap \n\
 Mongo: $mongo \n\
 NS proc: $ns \n\
-FreeDNS name and IP: $FD \n\
+DNS name and IP: $FD \n\
 Certificate: $cert \
  " 29 50 2\
  "1" "Return"\
@@ -170,7 +170,7 @@ exit
 2)
 dialog --colors --msgbox "       \Zr Developed by the xDrip team \Zn\n\n\
                \Zb\Z1Keep private.\Zn\n\
-FreeDNS hostname:  $HOSTNAME\n\
+DNS hostname:  $HOSTNAME\n\
 API_SECRET: $apisec" 9 50
 ;;
 
