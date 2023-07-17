@@ -177,7 +177,7 @@ sudo systemctl start rc-local.service
 /xDrip/scripts/menu_DNS.sh
 
 # Configure DNS
-/xDrip/scripts/ConfigureDNS.sh
+/xDrip/scripts/DNS-config.sh
 if [ ! -s /tmp/DNS-config_Failed ]
 then
 clear
