@@ -148,3 +148,11 @@ cat> /etc/dns-config.sh<<EOF
 export HOSTNAME=$hostname
 export DIRECTURL=$directurl
 EOF
+
+else  # If FreeDNS is down
+dialog --colors --msgbox "       \Zr Developed by the xDrip team \Zn\n\n\
+It seems the DNS site is down.  Please try again when DNS is back up." 9 50
+cat > /tmp/DNS-config_Failed << EOF
+The FreeDNS site is down.
+EOF
+fi

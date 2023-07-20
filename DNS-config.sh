@@ -77,11 +77,3 @@ Internal error.  Must run DNS setup again.
 EOF
 
 dialog --colors --msgbox "       \Zr Developed by the xDrip team \Zn\n\nInternal error.  Press enter to exit.  Then, run \"Install Nightscout phase 2\" again." 8 50
-
-else  # If DNS is down
-dialog --colors --msgbox "       \Zr Developed by the xDrip team \Zn\n\n\
-It seems the DNS site is down.  Please try again when DNS is back up." 9 50
-cat > /tmp/DNS-config_Failed << EOF
-The DNS site is down.
-EOF
-fi
