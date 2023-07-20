@@ -52,9 +52,6 @@ Please try again." 16 50
 done
 clear
 
-export HOSTNAME=$hostname
-export DIRECTURL=$ipaddress
-
 #create a file to store the data for the startup script.
 cat> /etc/dns-config.sh<<EOF
 #!/bin/sh
