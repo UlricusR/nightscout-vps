@@ -7,6 +7,10 @@ echo "Cannot continue."
 exit 5
 fi
 
+# Get HOSTNAME and DIRECTURL
+. /etc/dns-config.sh
+echo HOSTNAME=$HOSTNAME - DIRECTURL=$DIRECTURL
+
 # Start the first update immediately
 wget -O - --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 $DIRECTURL
 
