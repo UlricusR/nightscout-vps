@@ -16,6 +16,8 @@ Press Enter to execute the highlighted option.\n" 14 50 4\
  "4" "Return"\
  3>&1 1>&2 2>&3)
 
+ clear
+
 case $Choice in
 
 

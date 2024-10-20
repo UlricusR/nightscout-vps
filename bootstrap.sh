@@ -1,6 +1,6 @@
 #!/bin/bash
 PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
-# curl https://raw.githubusercontent.com/Navid200/cgm-remote-monitor/FreeDNSDown_Test/bootstrap.sh | bash
+# curl https://raw.githubusercontent.com/Navid200/cgm-remote-monitor/BackupMenuImprovement_Test/bootstrap.sh | bash
 
 echo 
 echo "Bootstrapping the installation files - JamOrHam - Navid200"
@@ -66,7 +66,7 @@ ls > /tmp/repo
 sudo mv -f /tmp/repo .    # The repository name is now in /srv/repo
 cd "$(< repo)"
 sudo git checkout vps-1  # ✅✅✅✅✅ Main - Uncomment before PR.
-#sudo git checkout SingleQuotes_Test  # ⛔⛔⛔⛔⛔ For test - Comment out before PR.
+#sudo git checkout BackupMenuImprovement_Test  # ⛔⛔⛔⛔⛔ For test - Comment out before PR.
 
 sudo git branch > /tmp/branch
 grep "*" /tmp/branch | awk '{print $2}' > /tmp/brnch
@@ -122,9 +122,7 @@ else # If this is an existing installation.
 fi
 
 # Add log 
-rm -rf /tmp/Logs
-echo -e "Bootstrap completed     $(date)\n" | cat - /xDrip/Logs > /tmp/Logs
-sudo /bin/cp -f /tmp/Logs /xDrip/Logs
+/xDrip/scripts/AddLog.sh "Bootstrap completed" /xDrip/Logs
 
 # Bring up the status page
 /xDrip/scripts/Status.sh

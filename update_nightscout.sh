@@ -130,9 +130,7 @@ done
 EOF
 
 # Add log
-rm -rf /tmp/Logs
-echo -e "Nightscout customization completed     $(date)\n" | cat - /xDrip/Logs > /tmp/Logs
-sudo /bin/cp -f /tmp/Logs /xDrip/Logs
+/xDrip/scripts/AddLog.sh "Nightscout customization completed" /xDrip/Logs
 
 sudo reboot # Reboot so that Nightscout starts.
  

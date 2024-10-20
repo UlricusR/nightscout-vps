@@ -15,7 +15,7 @@ fi
 sudo apt-get install bind9-dnsutils -y
 
 echo
-echo "Move to use free dns instead of noip.com" - tzachi-dar
+echo "Move to use free dns instead of noip.com - tzachi-dar"
 echo
 
 got_them=0
@@ -118,6 +118,7 @@ then
         else
           FLine=$(</tmp/FullLine)
           got_them=1 # We have the hostname and direct URL
+          
         fi # fi 1
 
       fi # fi 2
@@ -148,6 +149,75 @@ cat> /etc/dns-config.sh<<EOF
 export HOSTNAME=$hostname
 export DIRECTURL=$directurl
 EOF
+
+# Create a file to store the FreeDNS user ID and password.
+rm -rf /xDrip/FreeDNS_ID_Pass
+cat > /xDrip/FreeDNS_ID_Pass << EOF
+#!/bin/sh
+# This file is generated automatically.  It will be deleted and recreated.
+# Please do not add anything to this file.
+export User_ID=$user
+export Password=$pass
+EOF
+
+# Start the first update immediately
+wget -O - --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 $directurl
+
+dialog --colors --msgbox "       \Zr Developed by the xDrip team \Zn\n\n\
+Press enter to proceed.  Please be patient as it may take up to 10 minutes to complete." 8 50
+clear
+# wait for the ip to be updated. This might take up to 10 minutes.
+cnt=0
+while : ; do
+    sleep 30
+    registered=$(nslookup $hostname|tail -n2|grep A|sed s/[^0-9.]//g)
+    current=$(wget -q -O - http://checkip.dyndns.org|sed s/[^0-9.]//g)
+    echo $current $registered
+    [[ "$registered" != "$current" ]] || break
+    cnt=$((cnt+1))
+    echo $cnt
+    if (( cnt%6 == 0 )); then
+         echo "ccc" $cnt
+        wget -O - --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 $directurl
+    fi
+    sudo systemd-resolve --flush-caches
+    ping -c 1 $hostname
+    sudo systemd-resolve -4 $hostname
+    if [ $cnt -gt 20 ]
+    then
+      clear
+      dialog --colors --msgbox "       \Zr Developed by the xDrip team \Zn\n\n\
+Please close this window.  Open a new SSH terminal.  Run FreeDNS Setup again to complete FreeDNS setup." 9 50
+      exit
+    fi
+done
+
+#Fix the certificate using the new host name.
+
+for i in {1..4}
+do
+    for j in {1..1000}
+    do
+    read -t 0.001 dummy
+    done
+
+    sudo certbot --nginx -d "$hostname" --redirect --agree-tos --no-eff-email
+
+    if [ ! -s /etc/letsencrypt/live/"$hostname"/cert.pem ] || [ ! -s /etc/letsencrypt/live/"$hostname"/privkey.pem ]
+    then
+
+         echo freedns failed sleeping 
+         sleep 60
+    else
+        # worked, geting out of the loop.
+        exit 1
+    fi
+done
+cat > /tmp/FreeDNS_Failed << EOF
+Internal error.  Must run FreeDNS again.
+EOF
+
+dialog --colors --msgbox "       \Zr Developed by the xDrip team \Zn\n\nInternal error.  Press enter to exit.  Then, run \"Install Nightscout phase 2\" again." 8 50
 
 else  # If FreeDNS is down
 dialog --colors --msgbox "       \Zr Developed by the xDrip team \Zn\n\n\

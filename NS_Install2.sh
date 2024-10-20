@@ -54,7 +54,7 @@ export AUTH_DEFAULT_ROLES='denied'
 export PUMP_FIELDS='reservoir battery clock'
 export DEVICESTATUS_ADVANCED='true'
 export THEME='colors'
-export DBSIZE_MAX='20000'
+export DBSIZE_MAX='15000'
 
 EOF
 
@@ -99,10 +99,11 @@ go_back=0
 clear
 exec 3>&1
 Value=$(dialog --colors --ok-label "Submit" --form "       \Zr Developed by the xDrip team \Zn\n\n\n\
-Your current API_SECRET is $cs\n\n\
-You can press escape to keep it unchanged.  Or, enter a new one with at least 12 characters excluding the following.\n\n\
-$  \"  '  \\ \n " 19 50 0 "API_SECRET:" 1 1 "$secr" 1 14 25 0 2>&1 1>&3)
+API_SECRET:   $cs\n\n\
+Press escape to keep it, or enter a new API_SECRET with at least 12 characters excluding the following.\n\
+  $   \"   '   \\   SPACE   @   / " 16 50 0 "API_SECRET:" 1 1 "$secr" 1 14 25 0 2>&1 1>&3)
 response=$?
+clear
 if [ $response = 255 ] || [ $response = 1 ] # cancled or escaped
 then
   ns="$cs"
@@ -122,12 +123,12 @@ clear
 
 if [ $go_back -lt 1 ]
 then
-  if [[ $ns == *[\$]* ]] || [[ $ns == *[\"]* ]] || [[ $ns == *[\']* ]] || [[ $ns == *[\\]* ]] # Reject if submission contains unacceptable characters.
+  if [[ $ns == *[\$]* ]] || [[ $ns == *[\"]* ]] || [[ $ns == *[\']* ]] || [[ $ns == *[\\]* ]] || [[ $ns == *[\ ]* ]] || [[ $ns == *[@]* ]] || [[ $ns == *[\/]* ]] # Reject if submission contains unacceptable characters.
   then
     go_back=1
     clear
     dialog --colors --msgbox "       \Zr Developed by the xDrip team \Zn\n\n\
-API_SECRET should not include $, \\, ' or \".  Please try again."  8 50
+API_SECRET should not include the following characters. Please try again.\n $  \"  \\  '  SPACE  @  /"  9 50
   else
     got_it=1
   fi
@@ -140,16 +141,7 @@ then
   sed -i -e "s/API_SECRET=.*/API_SECRET=\'${ns}\'/g" /etc/nsconfig # Replace API_SECRET in nsconfig with the new one using single quotes.
 fi
 
-cat > /etc/rc.local << "EOF"
-#!/bin/bash
-PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
-cd /tmp
-swapon /var/SWAP
-service snapd stop
-service mongodb start
-screen -dmS nightscout sudo -u nobody bash /etc/nightscout-start.sh
-service nginx start
-EOF
+/xDrip/scripts/StartUpSetup.sh
 
  chmod a+x /etc/rc.local
 
@@ -183,12 +175,11 @@ then
 clear
 
 # Add log
-rm -rf /tmp/Logs
-echo -e "Installation phase 2 completed     $(date)\n" | cat - /xDrip/Logs > /tmp/Logs
-sudo /bin/cp -f /tmp/Logs /xDrip/Logs
+/xDrip/scripts/AddLog.sh "Installation phase 2 completed" /xDrip/Logs
 
 dialog --colors --msgbox "       \Zr Developed by the xDrip team \Zn\n\n\
 Press enter to restart the server.  This will result in an expected error message.  Wait 30 seconds before clicking on retry to reconnect or using a browser to access your Nightscout." 10 50
+clear
 sudo reboot
 fi
  

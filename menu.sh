@@ -12,7 +12,7 @@ Choice=$(dialog --colors --nocancel --nook --menu "\
         \Zr Developed by the xDrip team \Zn\n\n
 Use the arrow keys to move the cursor.\n\
 Press Enter to execute the highlighted option.\n\n" 18 50 8\
- "1" "Status"\
+ "1" "Status (may take up to 2 minutes.)"\
  "2" "Logs"\
  "3" "Google Cloud setup"\
  "4" "Nightscout setup"\
@@ -22,6 +22,8 @@ Press Enter to execute the highlighted option.\n\n" 18 50 8\
  "8" "Exit to shell (terminal)"\
  3>&1 1>&2 2>&3)
 
+ clear
+
 case $Choice in
 
 1)
@@ -29,7 +31,6 @@ case $Choice in
 ;;
 
 2)
-clear
 dialog --colors --title "\Zr Developed by the xDrip team \Zn"   --textbox /xDrip/Logs 26 74 
 ;;
 

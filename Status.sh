@@ -2,7 +2,7 @@
 
 # Show a summary of parameters.  -  Navid200
 clear
-echo "Please be patient (30 seconds)"
+echo "Please be patient.  It may take up to 2 minutes."
 echo "  "
 echo "  "
 
@@ -47,7 +47,7 @@ swap="$(free -h | sed -n 3p | awk '{print $2}')"
 
 #Ubuntu version
 ubuntu="$(lsb_release -a | sed -n 2p | awk '{print $3, $4}')"
-if [ ! "$ubuntu" = "20.04.5 LTS" && ! "$ubuntu" = "20.04.6 LTS" ]
+if [ ! "$ubuntu" = "20.04.6 LTS" ]
 then
 ubuntu="\Zb\Z1$(lsb_release -a | sed -n 2p | awk '{print $3, $4}')\Zn"
 fi
@@ -92,7 +92,6 @@ then
 FD="No hostname"
 else
 registered=$(nslookup $HOSTNAME|tail -n2|grep A|sed s/[^0-9.]//g)
-current=$(wget -q -O - http://checkip.dyndns.org|sed s/[^0-9.]//g)
 if [ ! "$registered" = "$current" ]
 then
 FD="\Zb\Z1Mismatch\Zn"
@@ -102,7 +101,7 @@ fi
 fi
 
 . /etc/nsconfig
-apisec=$API_SECRET
+apisec=$API_SECRET # What Nightscout sees as API_SECRET
 
 curl https://$HOSTNAME > /tmp/$HOSTNAME.txt
 curl_ret=$?
@@ -110,6 +109,13 @@ if (( curl_ret != 0 )); then
 cert="\Zb\Z1Invalid\Zn"
 else
 cert="Valid"
+fi
+
+# Node
+node="$(node -v)"
+if [ ! "${node%%.*}" = "v16" ] # If node version is any other than v16
+then
+node="\Zb\Z1$(node -v)\Zn" 
 fi
 
 # Verify that the latest added package has been installed
@@ -137,6 +143,56 @@ then
   rclocal_1=""
 fi
 
+# Mark FreeDNS login issues.
+freedns_id=""
+freedns_pass=""
+if [ -s /xDrip/FreeDNS_ID_Pass ]
+then
+  . /xDrip/FreeDNS_ID_Pass
+  freedns_id=$User_ID
+  freedns_pass=$Password
+fi
+freedns_id_pass=""
+if [ -s /xDrip/FreeDNS_Fail ] || [ ! -s /xDrip/FreeDNS_ID_Pass ]
+then
+  freedns_id_pass="\Zb\Z5FreeDNS ID and pass\Zn"
+fi
+
+# Verify API_SECRET since it can be edited after installation
+apisec_problem="" # No flag
+apisec_literal=$(grep 'API_SECRET=' /etc/nsconfig) # Extract the line containing API_SECRET= from the nsconfig file (including the quotation marks).
+apisec_literal=$(echo "$apisec_literal" | sed 's/^.*=//') # Drop everything up to and including the equal sign.
+if [[ "$apisec_literal" == *" #"* ]] # Is there a comment?
+then
+  apisec_literal=${apisec_literal%%#*} # Remove the comment and everything after.
+fi
+apisec_literal=$(echo "$apisec_literal" | awk '{$1=$1};1') # Remove trailing spaces
+apisec_literal="$apisec_literal"
+first="${apisec_literal:0:1}" # The first character, which should be either ' or "
+last="${apisec_literal: -1}" # The last character, which should be either ' or "
+if [[ "$first" == "$last" ]] # Are the first and last characters identical?
+then
+  if [[ "$first" == "'" ]] || [[ "$first" == "\"" ]] # Is the first character either ' or "
+  then
+    apisec_literal="${apisec_literal:1: -1}" # Remove the first and last characters (quotation mark pair)
+    if [[ "$apisec_literal" == *"@"* ]] || [[ "$apisec_literal" == *" "* ]] || [[ "$apisec_literal" == *"/"* ]] || [[ "$apisec_literal" == *"\\"* ]] || [[ "$apisec_literal" == *"'"* ]] || [[ "$apisec_literal" == *"\""* ]] || [[ "$apisec_literal" == *"$"* ]] || [[ ${#apisec_literal} -lt 12 ]] # Is an illegal character present?
+    then
+      apisec_problem="*" # Mark the presence of one of the seven illegal characters.  
+      if [[ "$apisec" != "$apisec_literal"  ]] # Is what Nightscout sees different than what we have extracted?
+      then
+        apisec_problem="*" # Mark an unacceptable combination.
+      fi
+    fi
+  else
+    apisec_problem="*" # Mark that the first character is neither ' nor "
+  fi
+else
+  apisec_problem="*" # Mark that the first and last characters (should be a pair of quoation marks) are not identical.
+fi
+
+# Show the first line of last reboot
+LastReboot=$(last reboot | head -1 | awk '{print $4, "", $5, $6, $7}')
+
 clear
 Choice=$(dialog --colors --nocancel --nook --menu "\
         \Zr Developed by the xDrip team \Zn\n\n\
@@ -148,31 +204,34 @@ Disk size: $disksz        $DiskUsedPercent used \n\
 Ubuntu: $ubuntu \n\
 HTTP & HTTPS:  $http \n\
 ------------------------------------------ \n\
-Nightscout on Google Cloud: 2023.05.09\n\
-$Missing $Phase1 $rclocal_1 \n\n\
+Google Cloud Nightscout  2024.08.28\n\
+$apisec_problem $Missing $Phase1 $rclocal_1 $freedns_id_pass \n\n\
 /$uname/$repo/$branch\n\
 Swap: $swap \n\
+Ubuntu update: $LastReboot \n\
+Node: $node \n\
 Mongo: $mongo \n\
 NS proc: $ns \n\
 DNS name and IP: $FD \n\
 Certificate: $cert \
- " 29 50 2\
+ " 32 50 3\
  "1" "Return"\
- "2" "Hostname and password"\
+ "2" "Login credentials"\
  3>&1 1>&2 2>&3)
  
- case $Choice in
+case $Choice in
  
- 1)
+1)
 exit
 ;;
 
 2)
 dialog --colors --msgbox "       \Zr Developed by the xDrip team \Zn\n\n\
-               \Zb\Z1Keep private.\Zn\n\
-DNS hostname:  $HOSTNAME\n\
-API_SECRET: $apisec" 9 50
+              \Zb\Z1Keep private!\Zn\n\n\
+Hostname:  $HOSTNAME\n\
+API_SECRET: $apisec\n\n\
+FreeDNS User ID: $freedns_id\n\
+FreeDNS password: $freedns_pass" 13 50
 ;;
-
 esac
  

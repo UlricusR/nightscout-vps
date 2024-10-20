@@ -29,12 +29,24 @@ cd /tmp
 cp /etc/nsconfig .
 tar -cf ~/$Filename database.gz nsconfig
 
-dialog --colors --msgbox "       \Zr Developed by the xDrip team \Zn\n\n\n\
-Backup is complete.\n\
-However, it is on the same virtual machine that your database and variables are on.  It's best to download the file to your computer for safekeeping.\n\
-See the guide for how to download." 13 50
-clear
+ dialog --colors --infobox "       \Zr Developed by the xDrip team \Zn\n\n\n\
+Backup is complete.\n\n\
+Copy the full path to the backup file shown below, and click \"DOWNLOAD FILE\" above to download it.\n\n\
+Press any key to return to the main menu." 13 50
+cd ~ 
+tput civis
+echo ""
+echo ""
+echo ""
+echo ""
+readlink -f $Filename
+# read -p "Press any key to continue... " -n1 -s
+# read -p "Press Enter to continue... "  
+
+read -p "" -n1 -s
+tput cnorm
+ 
 exit
 fi
-done
+done 
  

@@ -31,15 +31,10 @@ mkswap /var/SWAP
 fi
 swapon 2>/dev/null /var/SWAP
 
-echo "Installing system basics"
-sudo apt-get update
-sudo apt-get -y install wget gnupg libcurl4 openssl liblzma5
-sudo apt-get -y install dirmngr apt-transport-https lsb-release ca-certificates
-sudo apt-get -y install net-tools
-sudo apt-get -y install build-essential
-# Please don't add any more utilities here.  Please instead, add them to update_packages.sh.
-
+# Please don't add any utility installs here.  Please instead, add them to update_packages.sh.
 /xDrip/scripts/update_packages.sh
+
+sudo apt-get update
 
 # Create mongo user and admin.
 echo -e "use Nightscout\ndb.createUser({user: \"username\", pwd: \"password\", roles:[\"readWrite\"]})\nquit()" | mongo
@@ -53,7 +48,8 @@ sudo git reset --hard  # delete any local edits.
 sudo git pull  # Update database from remote.
 
 sudo npm install
-sudo npm run generate-keys
+# sudo npm run postinstall
+sudo npm run-script post-generate-keys
 
 for loop in 1 2 3 4 5 6 7 8 9
 do
@@ -61,7 +57,5 @@ read -t 0.1 dummy
 done
 
 # Add log
-rm -rf /tmp/Logs
-echo -e "Installation phase 1 completed     $(date)\n" | cat - /xDrip/Logs > /tmp/Logs
-sudo /bin/cp -f /tmp/Logs /xDrip/Logs
- 
+/xDrip/scripts/AddLog.sh "Installation phase 1 completed" /xDrip/Logs
+  
