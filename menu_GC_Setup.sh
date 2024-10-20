@@ -47,11 +47,11 @@ Close this terminal to complete updates." 7 50
 ;;
 
 4)
-curl https://raw.githubusercontent.com/jamorham/nightscout-vps/vps-1/bootstrap.sh | bash
+curl https://raw.githubusercontent.com/ulricusr/nightscout-vps/vps-1/bootstrap.sh | bash
 ;;
 
 5)
-curl https://raw.githubusercontent.com/jamorham/nightscout-vps/vps-dev/bootstrap.sh | bash
+curl https://raw.githubusercontent.com/ulricusr/nightscout-vps/vps-dev/bootstrap.sh | bash
 ;;
 
 6)
